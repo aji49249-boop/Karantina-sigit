@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jadwal Karantina Sigit &mdash; Teknisi Toyota</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  :root { --accent: #ff6b35; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #0b0d11;
+    display: flex;
+    justify-content: center;
+    padding: 24px 12px;
+  }
+  .ff-display { font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; }
+
+  .poster {
+    width: 1000px;
+    max-width: 100%;
+    background: linear-gradient(180deg, #11151c 0%, #161b24 100%);
+    color: #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    padding: 48px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+  }
+  .glow-top { position: absolute; top: -140px; right: -140px; width: 360px; height: 360px; border-radius: 50%; background: var(--accent); opacity: 0.14; }
+  .glow-bottom { position: absolute; bottom: -180px; left: -120px; width: 320px; height: 320px; border-radius: 50%; background: var(--accent); opacity: 0.10; }
+
+  .header { display: flex; align-items: center; gap: 18px; z-index: 1; }
+  .logo-box { width: 64px; height: 64px; border-radius: 16px; background: var(--accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .header-text { display: flex; flex-direction: column; gap: 4px; }
+  .eyebrow { font-size: 15px; letter-spacing: 3px; color: var(--accent); font-weight: 700; text-transform: uppercase; }
+  .title { font-size: 34px; font-weight: 700; line-height: 1.1; }
+
+  .meta-bar {
+    margin-top: 14px; z-index: 1;
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    padding: 12px 2px;
+    font-size: 16px; color: #c7cbd4; font-weight: 500;
+  }
+  .hint { font-size: 12px; color: #8a919c; margin-top: 10px; z-index: 1; }
+
+  .schedule { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; z-index: 1; flex: 1; }
+
+  .day { display: flex; flex-direction: column; }
+  .row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 8px 14px; border-radius: 12px;
+    cursor: pointer; border: none; text-align: left; width: 100%;
+    font-family: inherit;
+  }
+  .row.normal { background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.06); }
+  .row.short  { background: rgba(255,255,255,0.05);  border: 1px solid rgba(255,255,255,0.08); }
+  .row.off    { background: rgba(255,255,255,0.03);  border: 1px solid rgba(255,255,255,0.05); }
+  .row.sim    { background: rgba(255,107,53,0.16);   border: 1px solid var(--accent); }
+  .row:hover { filter: brightness(1.12); }
+
+  .badge { width: 48px; height: 48px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+  .row.normal .badge { background: #1f2531; }
+  .row.short  .badge { background: #2a3040; }
+  .row.off    .badge { background: #242a35; }
+  .row.sim    .badge { background: var(--accent); }
+
+  .badge .date { font-size: 18px; font-weight: 700; line-height: 1; }
+  .row.normal .badge .date, .row.short .badge .date { color: #e7e9ed; }
+  .row.off  .badge .date { color: #6b7280; }
+  .row.sim  .badge .date { color: #11151c; }
+
+  .badge .day-label { font-size: 9px; letter-spacing: 0.5px; margin-top: 2px; }
+  .row.normal .badge .day-label { color: #8a919c; }
+  .row.short  .badge .day-label { color: #9aa0ab; }
+  .row.off    .badge .day-label { color: #555c68; }
+  .row.sim    .badge .day-label { color: #11151c; }
+
+  .info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .topic { font-size: 14.5px; font-weight: 600; }
+  .row.normal .topic, .row.short .topic { color: #e7e9ed; }
+  .row.off  .topic { color: #6b7280; }
+  .row.sim  .topic { color: #ffffff; }
+
+  .time { font-size: 12px; }
+  .row.normal .time { color: #8a919c; }
+  .row.short  .time { color: #9aa0ab; }
+  .row.off    .time { color: #555c68; }
+  .row.sim    .time { color: #f0c9b8; }
+
+  .flag-icon, .chevron { flex-shrink: 0; }
+  .chevron { transition: transform 0.15s ease; color: #8a919c; }
+  .day.open .chevron { transform: rotate(180deg); }
+
+  .detail {
+    display: none;
+    margin: 6px 0 2px 62px;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.025);
+    border: 1px dashed rgba(255,255,255,0.12);
+  }
+  .day.open .detail { display: flex; }
+  .detail-row { display: flex; align-items: baseline; gap: 12px; }
+  .detail-time { width: 150px; flex-shrink: 0; font-size: 12.5px; font-weight: 600; color: #e7e9ed; font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif; }
+  .detail-label { font-size: 12.5px; color: #b9bec8; }
+
+  .footer {
+    margin-top: 16px; z-index: 1;
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.12);
+  }
+  .tagline { font-size: 15px; font-weight: 600; color: var(--accent); }
+  .legend { display: flex; align-items: center; gap: 18px; font-size: 11px; color: #9aa0ab; }
+  .legend .item { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  .swatch.sim { background: var(--accent); }
+  .swatch.off { background: #2a2f3a; }
+
+  @media (max-width: 720px) {
+    .poster { padding: 28px; }
+    .title { font-size: 26px; }
+    .detail { margin-left: 0; }
+    .detail-time { width: 120px; }
+  }
+</style>
+</head>
+<body>
+<div class="poster">
+  <div class="glow-top"></div>
+  <div class="glow-bottom"></div>
+
+  <div class="header">
+    <div class="logo-box">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#11151c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M14.7 6.3a4 4 0 1 1-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 1 1 5.4-5.4l-2.3 2.3-2-2 2.3-2.3Z"></path>
+      </svg>
+    </div>
+    <div class="header-text">
+      <div class="eyebrow ff-display">Jadwal Karantina</div>
+      <div class="title ff-display">Sigit &mdash; Teknisi Toyota</div>
+    </div>
+  </div>
+
+  <div class="meta-bar">
+    <div>16 &ndash; 30 November 2026</div>
+    <div>Hari-H: 2 Desember 2026</div>
+  </div>
+
+  <div class="hint">Klik tanggal untuk lihat rincian jadwal per jam.</div>
+
+  <div class="schedule" id="schedule"></div>
+
+  <div class="footer">
+    <div class="tagline ff-display">Siap &middot; Tenang &middot; Presisi</div>
+    <div class="legend">
+      <div class="item"><span class="swatch sim"></span>Simulasi lomba</div>
+      <div class="item"><span class="swatch off"></span>Libur</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var diagnosaBlocks = [
+    ['10.45–11.10', 'Skill Check Diagnosa 1: Diagnosa Engine Mogok (25 menit)'],
+    ['11.10–11.35', 'Skill Check Diagnosa 2: Basic Skill Diagnosa Engine (25 menit)'],
+  ];
+  var diagnosaBlock3 = ['13.00–13.25', 'Skill Check Diagnosa 3: Cek Data List Hybrid (25 menit)'];
+
+  function weekdayHours(materi) {
+    return [
+      ['08.30–09.30', 'Latihan fisik'],
+      ['09.30–10.00', 'Coffee break'],
+      ['10.00–10.45', 'Materi: ' + materi],
+    ].concat(diagnosaBlocks, [
+      ['11.35–12.00', 'Diskusi & tanya jawab materi'],
+      ['12.00–13.00', 'Istirahat, makan siang'],
+      diagnosaBlock3,
+      ['13.25–14.00', 'Praktik lanjutan / pendalaman kasus'],
+      ['14.00–15.30', 'Simulasi soal bertimer'],
+      ['15.30–16.00', 'Review hasil'],
+      ['16.00–16.30', 'Refleksi & persiapan materi besok'],
+    ]);
+  }
+
+  function saturdayHours(materi) {
+    return [
+      ['08.30–09.30', 'Latihan fisik'],
+      ['09.30–10.00', 'Coffee break'],
+      ['10.00–10.45', 'Materi: ' + materi],
+      ['10.45–11.10', 'Skill Check Diagnosa (rotasi mingguan, 25 menit)'],
+      ['11.10–11.30', 'Diskusi'],
+      ['11.30–12.30', 'Istirahat, makan siang'],
+      ['12.30–13.30', 'Latihan soal / praktik ringan'],
+      ['13.30–14.30', 'Review mingguan & evaluasi'],
+      ['14.30–15.00', 'Persiapan pekan depan, lalu pulang'],
+    ];
+  }
+
+  function diagnosaFullHours() {
+    return [
+      ['08.30–09.30', 'Latihan fisik'],
+      ['09.30–10.00', 'Coffee break'],
+      ['10.00–10.25', 'Skill Check Diagnosa 1: Diagnosa Engine Mogok — Putaran 1 (25 menit)'],
+      ['10.25–10.50', 'Skill Check Diagnosa 2: Basic Skill Diagnosa Engine — Putaran 1 (25 menit)'],
+      ['10.50–11.15', 'Skill Check Diagnosa 3: Cek Data List Hybrid — Putaran 1 (25 menit)'],
+      ['11.15–12.00', 'Diskusi & evaluasi hasil putaran 1'],
+      ['12.00–13.00', 'Istirahat, makan siang'],
+      ['13.00–13.25', 'Skill Check Diagnosa 1: Diagnosa Engine Mogok — Putaran 2 (25 menit)'],
+      ['13.25–13.50', 'Skill Check Diagnosa 2: Basic Skill Diagnosa Engine — Putaran 2 (25 menit)'],
+      ['13.50–14.15', 'Skill Check Diagnosa 3: Cek Data List Hybrid — Putaran 2 (25 menit)'],
+      ['14.15–14.30', 'Jeda'],
+      ['14.30–16.00', 'Simulasi gabungan ketiga skill, bertimer seperti kondisi lomba'],
+      ['16.00–16.30', 'Review & evaluasi akhir hari'],
+    ];
+  }
+
+  var simHours = [
+    ['08.30–09.00', 'Briefing & persiapan alat/perkakas'],
+    ['09.00–09.25', 'Skill Check Diagnosa 1: Diagnosa Engine Mogok (25 menit)'],
+    ['09.25–09.50', 'Skill Check Diagnosa 2: Basic Skill Diagnosa Engine (25 menit)'],
+    ['09.50–10.15', 'Skill Check Diagnosa 3: Cek Data List Hybrid (25 menit)'],
+    ['10.15–12.00', 'Simulasi Tahap 1: studi kasus kompleks, bertimer ketat'],
+    ['12.00–13.00', 'Istirahat, makan siang'],
+    ['13.00–15.30', 'Simulasi Tahap 2: diagnosa + presentasi hasil ke "juri"'],
+    ['15.30–16.30', 'Evaluasi & feedback menyeluruh (gladi bersih)'],
+  ];
+
+  var offHours = [
+    ['Sepanjang hari', 'Libur penuh — istirahat, pemulihan tubuh dan pikiran'],
+  ];
+
+  var days = [
+    {date:'16', day:'SEN', topic:'Materi: Cara Kerja Hybrid', time:'08.30–16.30', kind:'normal', hours: weekdayHours('Cara Kerja Hybrid')},
+    {date:'17', day:'SEL', topic:'Materi: 10 Prinsip Teknisi Profesional', time:'08.30–16.30', kind:'normal', hours: weekdayHours('10 Prinsip Teknisi Profesional')},
+    {date:'18', day:'RAB', topic:'Materi: Kaizen', time:'08.30–16.30', kind:'normal', hours: weekdayHours('Kaizen')},
+    {date:'19', day:'KAM', topic:'Materi: Semboyan Veloz Hybrid', time:'08.30–16.30', kind:'normal', hours: weekdayHours('Semboyan Veloz Hybrid')},
+    {date:'20', day:'JUM', topic:'Materi: 5S & K3', time:'08.30–16.30', kind:'normal', hours: weekdayHours('5S & K3')},
+    {date:'21', day:'SAB', topic:'Review Mingguan: 5 Materi Dasar', time:'08.30–15.00', kind:'short', hours: saturdayHours('Rekap 5 Materi Dasar (Minggu 1)')},
+    {date:'22', day:'MIN', topic:'LIBUR', time:'—', kind:'off', hours: offHours},
+    {date:'23', day:'SEN', topic:'Pendalaman Diagnosa Penuh', time:'08.30–16.30', kind:'normal', hours: diagnosaFullHours()},
+    {date:'24', day:'SEL', topic:'Pendalaman Diagnosa Penuh', time:'08.30–16.30', kind:'normal', hours: diagnosaFullHours()},
+    {date:'25', day:'RAB', topic:'Pendalaman Diagnosa Penuh', time:'08.30–16.30', kind:'normal', hours: diagnosaFullHours()},
+    {date:'26', day:'KAM', topic:'SIMULASI LOMBA PENUH (Gladi Bersih)', time:'08.30–16.30', kind:'sim', hours: simHours},
+    {date:'27', day:'JUM', topic:'Pendalaman Diagnosa Penuh', time:'08.30–16.30', kind:'normal', hours: diagnosaFullHours()},
+    {date:'28', day:'SAB', topic:'Pemantapan Ringan', time:'08.30–15.00', kind:'short', hours: saturdayHours('Rekap Seluruh Materi')},
+    {date:'29', day:'MIN', topic:'LIBUR', time:'—', kind:'off', hours: offHours},
+    {date:'30', day:'SEN', topic:'Review Akhir & Persiapan Mental', time:'08.30–16.30', kind:'normal', hours: weekdayHours('Review Akhir Semua Materi')},
+  ];
+
+  var flagSvg = '<svg class="flag-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--accent)"><path d="M4 22V4"></path><path d="M4 4h12l-1.5 4L16 12H4"></path></svg>';
+  var chevronSvg = '<svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>';
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  var container = document.getElementById('schedule');
+  days.forEach(function (d, i) {
+    var wrap = document.createElement('div');
+    wrap.className = 'day';
+    wrap.id = 'day-' + i;
+
+    var rowHtml =
+      '<button class="row ' + d.kind + '" type="button" aria-expanded="false" aria-controls="detail-' + i + '">' +
+        '<div class="badge"><div class="date ff-display">' + escapeHtml(d.date) + '</div><div class="day-label">' + escapeHtml(d.day) + '</div></div>' +
+        '<div class="info"><div class="topic">' + escapeHtml(d.topic) + '</div><div class="time">' + escapeHtml(d.time) + '</div></div>' +
+        (d.kind === 'sim' ? flagSvg : '') +
+        chevronSvg +
+      '</button>' +
+      '<div class="detail" id="detail-' + i + '">' +
+        d.hours.map(function (h) {
+          return '<div class="detail-row"><div class="detail-time ff-display">' + escapeHtml(h[0]) + '</div><div class="detail-label">' + escapeHtml(h[1]) + '</div></div>';
+        }).join('') +
+      '</div>';
+
+    wrap.innerHTML = rowHtml;
+    container.appendChild(wrap);
+
+    var btn = wrap.querySelector('.row');
+    btn.addEventListener('click', function () {
+      var isOpen = wrap.classList.contains('open');
+      wrap.classList.toggle('open', !isOpen);
+      btn.setAttribute('aria-expanded', String(!isOpen));
+    });
+  });
+</script>
+</body>
+</html>
